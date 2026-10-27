@@ -1,0 +1,13 @@
+{
+  "name": "skool-automation", "version": "0.1.0", "private": true, "type": "module",
+  "scripts": {
+    "setup": "npm ci --prefix frontend && npm ci --prefix backend",
+    "dev": "node scripts/dev.mjs",
+    "dev:ui": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "server": "npm start --prefix backend",
+    "test": "npm test --prefix backend && npm test --prefix frontend",
+    "db:check": "npm run db:check --prefix backend"
+  },
+  "engines": { "node": ">=22.12.0" }
+}

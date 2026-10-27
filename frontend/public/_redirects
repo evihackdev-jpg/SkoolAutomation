@@ -1,0 +1,4 @@
+# Replace api.example.com with your VPS backend's HTTPS domain before deploying.
+# Keep the API proxy before the single-page-app fallback.
+/api/*  https://api.example.com/api/:splat  200!
+/*      /index.html                       200

@@ -1,0 +1,6 @@
+{
+  "name": "skool-automation-backend", "version": "0.1.0", "private": true, "type": "module",
+  "scripts": { "start": "node --env-file-if-exists=.env server/index.mjs", "dev": "node --watch --env-file-if-exists=.env server/index.mjs", "test": "node --test server/*.test.mjs", "db:check": "node --env-file-if-exists=.env scripts/check-mongodb.mjs" },
+  "dependencies": { "mongodb": "^7.7.0", "selfsigned": "^5.5.0" },
+  "engines": { "node": ">=22.12.0" }
+}

@@ -1,0 +1,23 @@
+[Unit]
+Description=Skool Automation backend
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=skool
+Group=skool
+WorkingDirectory=/opt/skool-automation/backend
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node --env-file=.env server/index.mjs
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target

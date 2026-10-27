@@ -1,0 +1,50 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createServer } from 'node:http';
+import { createHandler } from './http.mjs';
+
+test('automation HTTP routes require JSON, reject cross-origin writes and bound input size', async () => {
+  const calls=[];
+  const automation={ list:async()=>({runs:[],configured:true}), start:async body=>{calls.push(['start',body]);return{run:{id:'test'}};}, saveFacts:async body=>{calls.push(['facts',body]);return{facts:{}};}, stop:async id=>{calls.push(['stop',id]);return{stopped:true};} };
+  const profileSettings={get:async()=>({profile:{answers:[]},accounts:[]}),save:async body=>{calls.push(['profile',body]);return{profile:body.profile};}};
+  const config={port:0,origins:[],automation,profileSettings,publishedPosts:async params=>({posts:[{title:'Confirmed post'}],nextCursor:params.get('cursor')})};
+  automation.clearHistory=async()=>{calls.push(['clear']);return{cleared:2};};
+  const server=createServer(createHandler({},config));await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));config.port=server.address().port;
+  const base=`http://127.0.0.1:${config.port}/api/automation`;
+  const json={method:'POST',headers:{'Content-Type':'application/json'},body:'{}'};
+  try {
+    assert.equal((await fetch(base)).status,200);
+    assert.equal((await fetch(base,{method:'POST',body:'{}'})).status,415);
+    assert.equal((await fetch(base,{...json,headers:{...json.headers,Origin:'https://foreign.test'}})).status,403);
+    assert.equal((await fetch(base,{...json,body:'x'.repeat(65537)})).status,413);
+    assert.equal((await fetch(base,{...json,body:'{invalid'})).status,400);
+    assert.equal(calls.length,0);
+    assert.equal((await fetch(base,json)).status,202);
+    assert.equal((await fetch(base+'/settings',{...json,method:'PUT'})).status,200);
+    const id='a'.repeat(36);
+    assert.equal((await fetch(base+'/'+id+'/stop',json)).status,200);
+    assert.deepEqual(calls.map(c=>c[0]),['start','facts','stop']);
+    const settingsUrl=`http://127.0.0.1:${config.port}/api/settings`;
+    assert.equal((await fetch(settingsUrl)).status,200);
+    assert.equal((await fetch(settingsUrl,{method:'PUT',body:'{}'})).status,415);
+    assert.equal((await fetch(settingsUrl,{...json,method:'PUT',headers:{...json.headers,Origin:'https://foreign.test'}})).status,403);
+    assert.equal((await fetch(settingsUrl,{...json,method:'PUT',body:'x'.repeat(65537)})).status,413);
+    assert.equal((await fetch(settingsUrl,{...json,method:'PUT',body:JSON.stringify({profile:{city:'Test city'}})})).status,200);
+    assert.deepEqual(calls[3],['profile',{profile:{city:'Test city'}}]);
+    const historyUrl=base+'/history';
+    assert.equal((await fetch(historyUrl,{method:'DELETE',headers:{Origin:'https://foreign.test'}})).status,403);
+    assert.equal((await fetch(historyUrl,{method:'DELETE',headers:{'Sec-Fetch-Site':'cross-site'}})).status,403);
+    assert.equal(calls.length,4);
+    assert.equal((await fetch(historyUrl)).status,404);
+    const cleared=await fetch(historyUrl,{method:'DELETE'});
+    assert.equal(cleared.status,200);assert.deepEqual(await cleared.json(),{cleared:2});
+    assert.deepEqual(calls[4],['clear']);
+    const post={title:'募集',content:'文'.repeat(10000),refineWithAI:false};
+    assert.equal((await fetch(base,{...json,body:JSON.stringify({goal:'目'.repeat(2000),post})})).status,202);
+    assert.deepEqual(calls[5][1].post,post);
+    const postsUrl=`http://127.0.0.1:${config.port}/api/published-posts?cursor=next-page`;
+    const posts=await fetch(postsUrl);assert.equal(posts.status,200);assert.deepEqual(await posts.json(),{posts:[{title:'Confirmed post'}],nextCursor:'next-page'});
+    assert.equal((await fetch(postsUrl,{headers:{Origin:'https://foreign.test'}})).status,403);
+    assert.equal((await fetch(postsUrl,json)).status,404);
+  } finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+});

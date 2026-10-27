@@ -1,0 +1,16 @@
+node_modules
+dist
+*.local
+.env
+.env.*
+!.env.example
+.local/
+.claude/
+.netlify/
+.vercel/
+artifacts/
+*.log
+*.pem
+*.key
+*.pfx
+*.p12

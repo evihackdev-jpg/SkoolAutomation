@@ -1,0 +1,16 @@
+# Replace api.example.com with the domain whose DNS points at the VPS.
+# Caddy obtains and renews the HTTPS certificate automatically.
+api.example.com {
+    encode zstd gzip
+    @api path /api/*
+    handle @api {
+        reverse_proxy 127.0.0.1:3001 {
+            header_up Host {host}
+            # Overwrite caller input; the backend only trusts its loopback proxy.
+            header_up X-Real-IP {remote_host}
+        }
+    }
+    handle {
+        respond "Not found" 404
+    }
+}

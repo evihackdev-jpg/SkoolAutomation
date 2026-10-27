@@ -1,0 +1,6 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# API proxy and SPA routes live in public/_redirects and are copied into dist.
+# Replace the example VPS domain in that file before deploying.

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Skool Discovery logo">
+  <title>Skool Discovery</title>
+  <!-- Favicon variant: heavier strokes so the mark survives at 16-32px. -->
+  <ellipse cx="256" cy="256" rx="220" ry="92" transform="rotate(-25 256 256)"
+           fill="none" stroke="#F52F43" stroke-width="46" stroke-opacity="0.85" />
+  <circle cx="256" cy="256" r="132" fill="#F52F43" />
+  <circle cx="385" cy="131" r="52" fill="#F52F43" />
+</svg>
