@@ -19,7 +19,9 @@ export function ownerCollection(collection, ownerId) {
   };
 }
 
-export function createIdentity(db) {
+export function createIdentity(db, { registrationCode = process.env.REGISTRATION_CODE } = {}) {
+  const registrationCodeHash = typeof registrationCode === 'string' && registrationCode.length
+    ? createHash('sha256').update(registrationCode).digest() : null;
   const users = db.collection('users');
   const sessions = db.collection('sessions');
   const limits = new Map();
@@ -43,6 +45,11 @@ export function createIdentity(db) {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 || body.password.length > 128) throw new InputError('Enter a valid email and a password of at most 128 characters.');
       let user;
       if (register) {
+        if (!registrationCodeHash) throw new AuthError('Account registration is currently unavailable.', 503);
+        if (typeof body.registrationCode !== 'string' || body.registrationCode.length > 128 ||
+          !timingSafeEqual(createHash('sha256').update(body.registrationCode).digest(), registrationCodeHash)) {
+          throw new AuthError('Registration code is incorrect.', 403);
+        }
         if (body.password.length < 12) throw new InputError('Use a password of at least 12 characters.');
         const salt = randomBytes(16).toString('hex');
         const passwordHash = (await scrypt(body.password, salt, 64)).toString('hex');

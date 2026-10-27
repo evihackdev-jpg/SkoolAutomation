@@ -8,7 +8,7 @@ npm run dev
 npm run build
 ```
 
-Development proxies `/api/*` to `http://127.0.0.1:3001`. To change that target, copy `.env.example` to `.env` and edit `DEV_API_TARGET`. Run the backend separately or use the parent project's `npm run dev` after `npm run setup`.
+Development proxies `/api/*` to `http://127.0.0.1:3002`. To change that target, copy `.env.example` to `.env` and edit `DEV_API_TARGET`. Run the backend separately or use the parent project's `npm run dev` after `npm run setup`.
 
 For Vercel, select this folder as **Root Directory**, use build command `npm run build`, and output directory `dist`. Replace `https://api.example.com` in `vercel.json` with your VPS API's HTTPS origin before deploying. API rewrites must stay before the SPA fallback. Browser requests remain on `/api` at the frontend origin, so host-only HttpOnly session cookies work without cross-site-cookie settings. API responses must not be cached.
 

@@ -72,7 +72,17 @@ try {
   recoveryTimer.unref();
   const server = createServer(createGateway({ identity, initialize, services, config: runtime.config, localOwner: runtime.localOwner }));
   server.requestTimeout = 30_000;
-  server.on('error', () => { console.error('Local API could not listen. Check API_PORT availability.'); process.exitCode = 1; });
+  server.on('error', error => {
+    const hint = error.code === 'EADDRINUSE'
+      ? 'The address/port is already in use. Check for an existing backend service before starting another instance.'
+      : error.code === 'EADDRNOTAVAIL'
+        ? 'API_HOST is not assigned to this machine. Use API_HOST=127.0.0.1 behind the VPS reverse proxy.'
+        : error.code === 'EACCES'
+          ? 'Permission denied when binding the API address/port. Check OS permissions and API_PORT.'
+          : 'Check API_HOST, API_PORT and operating system network settings.';
+    console.error(`Account API could not listen on ${runtime.host}:${port} (${error.code || 'UNKNOWN'}). ${hint}`);
+    process.exitCode = 1;
+  });
   server.listen(port, runtime.host, () => { console.log(`Account API: http://${runtime.host}:${port}`); void initialize().catch(() => {}); });
   servers.push(server);
   if (process.env.LAN_HOST) {

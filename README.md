@@ -20,13 +20,15 @@ npm run build
 npm run dev
 ```
 
-The existing local credentials are preserved in `backend/.env`. Frontend: http://127.0.0.1:5173. Backend: http://127.0.0.1:3001. Root npm commands delegate to the independent packages. `npm install` at the root alone does not install child-package dependencies; use `npm run setup`.
+The existing local credentials are preserved in `backend/.env`. Frontend: http://127.0.0.1:5173. Backend: http://127.0.0.1:3002. Root npm commands delegate to the independent packages. `npm install` at the root alone does not install child-package dependencies; use `npm run setup`.
 
 For a fresh local backend, copy `backend/.env.example` to `backend/.env`, provide the MongoDB URI, persistent cookie encryption key and OpenRouter key, use `NODE_ENV=development`, clear the production origins, set `TRUST_PROXY=false`, and opt in to `LOCAL_OWNER_ENABLED=true` only on loopback if you want the local-owner workspace. Leave `LAN_HOST` empty unless deliberately configuring optional LAN hosting.
 
 ## Deploy separately
 
-Deploy `frontend/` to Vercel and `backend/` to the VPS. Replace the placeholder API domain in `frontend/vercel.json`; configure exact HTTPS frontend/API origins and server credentials in `backend/.env`. VPS production requires login and forbids the local-owner shortcut. Follow [DEPLOYMENT.md](DEPLOYMENT.md) before starting the VPS service.
+Run `npm run build` at the root to generate `frontend/dist/` and `backend/dist/`. Use `npm run build:frontend` or `npm run build:backend` to build only one package. Running `npm run build` inside `backend/` also builds the backend independently. Backend builds check runtime JavaScript syntax and produce a deployment folder without credentials, tests or node_modules.
+
+Deploy `frontend/` to Vercel and the contents of `backend/dist/` to the VPS backend directory. Preserve the VPS `.env`, install production dependencies with `npm ci --omit=dev`, then restart the backend service. The built package runs with `npm start`. To run the build from a source checkout, use `npm run start:prod` inside `backend/`. The Vercel API rewrite points to `https://45.61.162.179`; configure exact HTTPS frontend/API origins and server credentials in `backend/.env`. VPS production requires login and forbids the local-owner shortcut. Follow [DEPLOYMENT.md](DEPLOYMENT.md) before starting the VPS service.
 
 Keep one backend process per database. Stop the local backend before starting the VPS: durable jobs resume automatically, and workers currently have no distributed-instance lock. Never put MongoDB, cookie-encryption or OpenRouter credentials in the frontend. Preserve the cookie encryption key when moving existing saved accounts. Existing local-owner data remains private and is not assigned to a public registrant.
 

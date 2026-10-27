@@ -9,7 +9,7 @@ function origin(value, name, production) {
 
 export function runtimeConfig(env = process.env) {
   const production = env.NODE_ENV === 'production';
-  const port = Number(env.API_PORT || env.PORT || 3001);
+  const port = Number(env.API_PORT || env.PORT || 3002);
   if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('API_PORT must be between 1024 and 65535.');
   const host = env.API_HOST || '127.0.0.1';
   if (!isIP(host)) throw new Error('API_HOST must be a bind IP address.');

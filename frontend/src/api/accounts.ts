@@ -11,9 +11,13 @@ export async function request<T>(path: string, options?: RequestInit, timeoutMs 
   } catch {
     throw new Error('Cannot reach the account backend. Start the API and check your connection.');
   }
+  return readApiResponse<T>(response);
+}
+
+export async function readApiResponse<T>(response: Response): Promise<T> {
   let data;
   try { data = await response.json(); } catch {
-    throw new Error('The account backend is unavailable. Start it with npm run server.');
+    throw new Error(`The service is temporarily unavailable (HTTP ${response.status}). Please try again later.`);
   }
   if (!response.ok) {
     if (response.status === 401) window.dispatchEvent(new Event('session-expired'));

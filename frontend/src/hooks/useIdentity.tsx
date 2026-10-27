@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { request } from '../api/accounts';
+import { request, readApiResponse } from '../api/accounts';
 import { IdentityContext as Context, type User } from './identityContext';
 export { useIdentity } from './identityContext';
 export function IdentityProvider({ children }: { children: ReactNode }) {
@@ -12,8 +12,7 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     setLoading(true); setError(null);
     fetch('/api/auth/me', { credentials: 'same-origin', signal: AbortSignal.timeout(15000) }).then(async response => {
       if (response.status === 401) { if (active) setUser(null); return; }
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Could not connect to the service.');
+      const data = await readApiResponse<{ user: User }>(response);
       if (active) setUser(data.user);
     }).catch(failure => { if (active) setError(failure instanceof Error ? failure.message : 'Could not connect to the service.'); })
       .finally(() => { if (active) setLoading(false); });
@@ -24,8 +23,8 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     window.addEventListener('session-expired', expired);
     return () => window.removeEventListener('session-expired', expired);
   }, []);
-  const signIn = async (email: string, password: string, register: boolean) => {
-    const data = await request<{ user: User }>(`/api/auth/${register ? 'register' : 'login'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+  const signIn = async (email: string, password: string, register: boolean, registrationCode?: string) => {
+    const data = await request<{ user: User }>(`/api/auth/${register ? 'register' : 'login'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, ...(register ? { registrationCode } : {}) }) });
     setUser(data.user); setError(null);
   };
   const signOut = async () => {

@@ -1,10 +1,16 @@
-# Replace api.example.com with the domain whose DNS points at the VPS.
-# Caddy obtains and renews the HTTPS certificate automatically.
-api.example.com {
+# Merge this site block into the existing /etc/caddy/Caddyfile.
+# Requires a current Caddy release with public IP ACME certificate support.
+# Let's Encrypt IP certificates require the shortlived profile; Caddy renews them.
+https://45.61.162.179 {
+    tls {
+        issuer acme https://acme-v02.api.letsencrypt.org/directory {
+            profile shortlived
+        }
+    }
     encode zstd gzip
     @api path /api/*
     handle @api {
-        reverse_proxy 127.0.0.1:3001 {
+        reverse_proxy 127.0.0.1:3002 {
             header_up Host {host}
             # Overwrite caller input; the backend only trusts its loopback proxy.
             header_up X-Real-IP {remote_host}
