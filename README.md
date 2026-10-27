@@ -26,7 +26,7 @@ For a fresh local backend, copy `backend/.env.example` to `backend/.env`, provid
 
 ## Deploy separately
 
-Run `npm run build` at the root to generate `frontend/dist/` and `backend/dist/`. Use `npm run build:frontend` or `npm run build:backend` to build only one package. Running `npm run build` inside `backend/` also builds the backend independently. Backend builds check runtime JavaScript syntax and produce a deployment folder without credentials, tests or node_modules.
+Run `npm run build` at the root to build only the backend into `backend/dist/`. Running `npm run build` inside `backend/` does the same. Backend builds check runtime JavaScript syntax and produce a deployment folder without credentials, tests or node_modules. The frontend is built separately by Vercel from `frontend/`; use `npm run build:frontend` only when you explicitly want a local UI build.
 
 Deploy `frontend/` to Vercel and the contents of `backend/dist/` to the VPS backend directory. Preserve the VPS `.env`, install production dependencies with `npm ci --omit=dev`, then restart the backend service. The built package runs with `npm start`. To run the build from a source checkout, use `npm run start:prod` inside `backend/`. The Vercel API rewrite points to `https://45.61.162.179`; configure exact HTTPS frontend/API origins and server credentials in `backend/.env`. VPS production requires login and forbids the local-owner shortcut. Follow [DEPLOYMENT.md](DEPLOYMENT.md) before starting the VPS service.
 
