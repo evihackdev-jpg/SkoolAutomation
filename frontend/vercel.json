@@ -4,7 +4,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://api.example.com/api/:path*" },
+    { "source": "/api/:path*", "destination": "https://45.61.162.179/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [ { "source": "/api/:path*", "headers": [{ "key": "Cache-Control", "value": "no-store" }] } ]
